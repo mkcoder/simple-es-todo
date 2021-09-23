@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -223,10 +225,10 @@ namespace todo_list_es
             foreach (var kv in eventStore.Store)
             {
                 Console.WriteLine($"Stream Name: {kv.Key}");
-                ConsoleTable table = new ConsoleTable(new string[] { "EventName", "Id", "Data" });
+                ConsoleTable table = new ConsoleTable(new string[] { "Id", "EventName", "Data" });
                 foreach (var item in kv.Value)
                 {
-                    table.AddRow(item.Id, item.EventName, item);
+                    table.AddRow(item.Id, item.EventName, JsonSerializer.Serialize((object)item));
                 }
                 table.Write();
             }
