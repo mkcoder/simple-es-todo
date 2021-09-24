@@ -57,6 +57,11 @@ namespace todo_list_es
             eventStore.StoreEvent($"TodoList.{AggregateId}", todoListRemoved);
         }
 
+        internal void UseTaskList(UseTaskListCommand command)
+        {
+            AggregateId = command.AggregateId;
+        }
+
         public void Redraw(Guid aggregateId)
         {
             var model = taskListProjector.Replay("TodoList", aggregateId);

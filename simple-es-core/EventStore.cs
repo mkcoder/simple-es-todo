@@ -60,6 +60,22 @@ namespace simple_es_core
             this.eventStore = eventStore;
         }
 
+        public List<Model> Replay(string stream)
+        {
+            var result = new List<Model>(); 
+            var streamEvents = eventStore.Store.Where(kv => kv.Key.Contains(stream));
+            foreach (var kv in streamEvents)
+            {
+                model = new Model();
+                foreach (var item in kv.Value)
+                {
+                    Handle(item);
+                }
+                result.Add(model);
+            }
+            return result;
+        }
+
         public Model Replay(string stream, Guid aggregateId)
         {
             model = new Model();

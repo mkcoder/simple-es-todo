@@ -23,6 +23,10 @@ namespace todo_list_es
         public string TaskName { get; set; }
         public Guid AggregateId { get; set; }
     }
+    public class UseTaskListCommand : ICommand
+    {
+        public Guid AggregateId { get; set; }
+    }
     public class RemoveTaskCommand : ICommand
     {
         public int Id { get; set; }

@@ -55,6 +55,12 @@ namespace todo_list_es
             Display.PrintScreen(command.ViewMode);
         }
 
+        private void Accept(UseTaskListCommand command)
+        {
+            aggregate.UseTaskList(command);
+            Display.SwitchViewMode(ViewMode.CreateTodoItem);
+        }
+
         private void Accept(RedrawCommand command)
         {
             if (Display.ViewMode == ViewMode.Admin)
@@ -66,6 +72,13 @@ namespace todo_list_es
             if (Display.ViewMode == ViewMode.CreateTodoItem)
             {
                 aggregate.Redraw(aggregate.AggregateId);
+            }
+
+            if (Display.ViewMode == ViewMode.ListTodoList)
+            {
+                var listProjector = new TaskListNameProjector(new EventStore());
+                var model = listProjector.Replay("TodoList");
+                Display.DrawList(model);
             }
         }
 

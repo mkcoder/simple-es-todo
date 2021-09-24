@@ -24,9 +24,16 @@ namespace todo_list_es
             var ch = new CommandHandler();
             while (true)
             {
-                var input = Display.GetInput();
-                var command = StringToCommandAdapter.GetCommand(input);
-                ch.Handle(command);
+                try
+                {
+                    var input = Display.GetInput();
+                    var command = StringToCommandAdapter.GetCommand(input);
+                    ch.Handle(command);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log("There was an error");
+                }
                 ch.Handle(new RedrawCommand());
             }
         }
@@ -101,6 +108,13 @@ namespace todo_list_es
                         Name = string.Join(" ", input.Split(" ").Skip(1).ToList())
                     };
                 }
+                else if (command.StartsWith("S"))
+                {
+                    return new SwitchCommand()
+                    {
+                        ViewMode = ViewMode.ListTodoList
+                    };
+                }
                 else if (command.StartsWith("A"))
                 {
                     var key = input.Split(" ")[1];
@@ -121,6 +135,24 @@ namespace todo_list_es
                     return new AddTaskCommand()
                     {
                         TaskName = string.Join(" ", input.Split(" ").Skip(1).ToList())
+                    };
+                }
+                else if (command.StartsWith("REMOVE", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return new RemoveTaskCommand()
+                    {
+                        Id = int.Parse(input.Split(" ")[1])
+                    };
+                }
+            }
+
+            if (Display.ViewMode == ViewMode.ListTodoList)
+            {
+                if (command.StartsWith("USE", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return new UseTaskListCommand()
+                    {
+                        AggregateId = Guid.Parse(input.Split(" ")[1])
                     };
                 }
                 else if (command.StartsWith("REMOVE", StringComparison.InvariantCultureIgnoreCase))
@@ -185,7 +217,7 @@ namespace todo_list_es
                     Console.WriteLine("[Q] - Quit");
                     break;
                 case ViewMode.ListTodoList:
-                    Console.WriteLine("[Use {todo-list}] - Change to this list");
+                    Console.WriteLine("[Use {id}] - Change to this list");
                     Console.WriteLine("[M] - Go back to the main menu");
                     break;
                 case ViewMode.CreateTodoItem:
@@ -233,6 +265,23 @@ namespace todo_list_es
                 table.Write();
             }
         }
+
+        internal static void DrawList(List<TaskList> model)
+        {
+            ConsoleTable table = new ConsoleTable(new string[] { "Id", "List Name" });
+            foreach (var item in model)
+            {
+                table.AddRow(item.AggregateId, item.ListName);
+            }
+            table.Write();
+        }
+    }
+
+
+    public class TaskList : IModel
+    {
+        public Guid AggregateId { get; set; }
+        public string ListName { get; set; }
     }
 
     public class TodoList : IModel
